@@ -1,0 +1,57 @@
+# app/config/security.yml
+
+security:
+  encoders:
+    UserBundle\Entity\Utilisateur: sha512
+
+  role_hierarchy:
+    ROLE_ADMIN: 
+    ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+
+  providers:
+    in_memory:
+      memory:
+        users:
+          user:  { password: userpass, roles: [ 'ROLE_ADMIN' ] }
+          admin: { password: adminpass, roles: [ 'ROLE_SUPER_ADMIN' ] }
+    main:
+      id: fos_user.user_provider.username
+
+  firewalls:
+    dev:
+      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      security: false
+    main_login:
+      pattern:   ^/login$
+      anonymous: true
+      logout_on_user_change: true
+    main_forgotterpassword:
+      pattern:   ^/resetting
+      anonymous: true
+      logout_on_user_change: true
+    main_register_confirm: #confirm/{token} ainsi que confirmed
+      pattern:   ^/register/confirm
+      anonymous: true
+      logout_on_user_change: true
+    main:
+      pattern:      ^/
+      anonymous:    false
+      provider:     main
+      form_login:
+        login_path: fos_user_security_login
+        check_path: fos_user_security_check
+      logout:
+        path:       fos_user_security_logout
+        target:     fos_user_security_login
+      remember_me:
+        secret:     '%secret%'
+      logout_on_user_change: true
+
+  access_control:
+    - { path: ^/resetting/request, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/register/confirm, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/login$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/admin, roles: ROLE_ADMIN }
+    - { path: ^/user/nationalite, roles: ROLE_ADMIN }
+    - { path: ^/user/pays, roles: ROLE_ADMIN }
+    - { path: ^/group/, roles: ROLE_ADMIN }
